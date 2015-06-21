@@ -1,1 +1,13 @@
 <h1>Factories</h1>
+
+<%= link_to 'Add a factory', new_factory_path %>
+
+<% @factories.each do |factory| %>
+    <div>
+      <h3><%= factory.name %></h3>
+      <p><%= factory.tags %></p>
+      <p>
+        <%= factory.city %>, <%= factory.state %> <%= factory.zipcode %>
+      </p>
+    </div>
+<% end %>

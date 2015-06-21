@@ -1,16 +1,20 @@
 class FactoriesController < ApplicationController
   def index
+    @factories = Factory.all
   end
 
   def create
     @factory = Factory.new(factory_params)
 
-    @factory.save
-    redirect_to @factory
+    if @factory.save
+      redirect_to @factory
+    else
+      render 'new'
+    end
   end
 
   def new
-
+    @factory = Factory.new
   end
 
   def edit
@@ -30,7 +34,8 @@ class FactoriesController < ApplicationController
   end
 
   private
+
     def factory_params
-      params.require(:factories).permit(:name, :email, :address1, :address2, :city, :state, :zipcode, :tags)
+      params.require(:factory).permit(:name, :email, :address1, :address2, :city, :state, :zipcode, :tags)
     end
 end
