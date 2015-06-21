@@ -18,7 +18,7 @@ class FactoriesController < ApplicationController
   end
 
   def edit
-
+    @factory = Factory.find(params[:id])
   end
 
   def show
@@ -26,7 +26,13 @@ class FactoriesController < ApplicationController
   end
 
   def update
+    @factory = Factory.find(params[:id])
 
+    if @factory.update(factory_params)
+      redirect_to @factory
+    else
+      render 'edit'
+    end
   end
 
   def destroy

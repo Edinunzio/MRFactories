@@ -1,12 +1,12 @@
-<h1>New Factory</h1>
+<h1>Edit Factory</h1>
 
-<%= form_for :factory, url: factories_path do |f| %>
+<%= form_for :factory, url: factory_path(@factory), method: :patch do |f| %>
 
     <% if @factory.errors.any? %>
         <div id="error_explanation">
           <h2>
             <%= pluralize(@factory.errors.count, "error") %>
-            prevented this factory from being added:
+            prevented your changes from being saved:
           </h2>
           <ul>
             <% @factory.errors.full_messages.each do |msg| %>
