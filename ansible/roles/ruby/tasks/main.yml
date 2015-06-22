@@ -1,0 +1,8 @@
+---
+
+- include: rvm.yml
+
+- name: Install bundler
+  command: /bin/bash -l -c 'gem install bundler --no-ri --no-rdoc'
+  sudo_user: 'root'
+

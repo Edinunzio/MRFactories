@@ -1,0 +1,10 @@
+---
+#- include: remote.yml
+
+#- name: Create and migrate DB
+  #command: /bin/bash -l -c 'rake db:create db:migrate' chdir='/home/MR_factories'
+  #sudo_user: 'root'
+  #ignore_errors: yes
+  #tags:
+    #- rails
+    #- db

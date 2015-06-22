@@ -12,4 +12,6 @@
 !/log/.keep
 /tmp
 *.idea/
+*.vagrant/
+.DS_Store
 

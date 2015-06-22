@@ -1,17 +1,88 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
+Vagrant.require_version '>= 1.5'
 
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  # All Vagrant configuration is done here. The most common configuration
-  # options are documented and commented below. For a complete reference,
-  # please see the online documentation at vagrantup.com.
+def require_plugins(plugins = {})
+  needs_restart = false
+  plugins.each do |plugin, version|
+    next if Vagrant.has_plugin?(plugin)
+    cmd =
+        [
+            'vagrant plugin install',
+            plugin
+        ]
+    cmd << "--plugin-version #{version}" if version
+    system(cmd.join(' ')) || exit!
+    needs_restart = true
+  end
+  exit system('vagrant', *ARGV) if needs_restart
+end
 
-  # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "ubuntu/trusty64"
-  config.vm.network "forwarded_port", guest: 70, host: 7000
-  config.vm.provision :ansible do |ansible| ansible.playbook = "playbook.yml"
+require_plugins \
+  'vagrant-bindfs' => '0.3.2'
+
+def ansible_installed?
+  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+  ENV['PATH'].split(File::PATH_SEPARATOR).any? do |p|
+    exts.any? do |ext|
+      full_path = File.join(p, "ansible-playbook#{ext}")
+      File.executable?(full_path) && File.file?(full_path)
+    end
+  end
+end
+
+
+Vagrant.configure('2') do |config|
+  config.vm.provider :virtualbox do |vb, override|
+    host = RbConfig::CONFIG["host_os"]
+
+    if host =~ /darwin/ # OS X
+      # sysctl returns bytes, convert to MB
+      vb.memory = `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 3
+      vb.cpus = `sysctl -n hw.ncpu`.to_i
+    elsif host =~ /linux/ # Linux
+      # meminfo returns kilobytes, convert to MB
+      vb.memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 / 2
+      vb.cpus = `nproc`.to_i
+    end
+
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+  end
+
+  config.vm.define 'MR_factories' do |machine|
+    machine.vm.hostname = 'localhost'
+    machine.vm.network 'forwarded_port', :guest => 443, :host => 8081, :auto_correct => true
+    machine.vm.network 'forwarded_port', :guest => 80, :host => 7000, :auto_correct => true
+
+    machine.vm.box = 'ubuntu/trusty64'
+
+    machine.vm.network 'private_network', ip: '192.168.20.50'
+    machine.vm.synced_folder '../../', '/app/'
+    machine.vm.synced_folder 'ansible', '/ansible'
+  end
+  config.vm.synced_folder '/MR_factories/', '/app/'
+
+
+  config.ssh.forward_agent = true
+
+  if ansible_installed?
+    config.vm.provision 'ansible' do |ansible|
+      ansible.playbook = 'ansible/site.yml'
+      ansible.sudo = true
+      ansible.groups = {
+          'application' => %w(MR_factories),
+          'vm' => %w(MR_factories),
+          'mysql' => %w(MR_factories),
+          'development:children' => %w(application vm mysql),
+      }
+      ansible.tags = ENV['TAGS']
+      ansible.raw_arguments = ENV['ANSIBLE_ARGS']
+    end
+  else
+    Dir['../shell/*.sh'].each do |script|
+      config.vm.provision 'shell', :path => script, :privileged => false, :args => ENV['ANSIBLE_ARGS']
+    end
   end
 end
