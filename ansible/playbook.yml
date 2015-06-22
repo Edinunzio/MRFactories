@@ -6,14 +6,48 @@
 
   tasks:
 
-    - name: install apache
+    - name: Update apt cache
+      apt: update_cache=yes
 
-      apt: name=apache2 state=present
+    - name: Install apt dependencies
+      apt: name={{ item }}
+      with_items:
+        - autoconf
+        - bison
+        - build-essential
+        - libssl-dev
+        - libyaml-dev
+        - libreadline6-dev
+        - zlib1g-dev
+        - libncurses5-dev
+        - nodejs
+        - python-pip
+        - python-dev
+        - htop
+        - git
 
-    - name: install mysql
+    - name: Install CURL
 
-      apt: name=mysql-server state=present
+      apt: name='{{ item }}'
+      with_items:
+        - curl
+        - libcurl3
+        - libcurl3-gnutls
+        - libcurl4-openssl-dev
+        - imagemagick
+        - qt5-default
+        - libqt5webkit5-dev
 
-    - name: install ruby
+    - name: Install mysql packages
+      apt: name='{{ item }}'
+      with_items:
+        - mysql-server
+        - libmysqlclient-dev
+        - python-pip
+        - python-dev
 
-      apt: name=ruby-2.2.2 state=present
+
+
+    #- name: Install ruby #might want to use rvm instead
+
+      #apt: name=ruby-full state=present
