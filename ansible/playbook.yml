@@ -98,9 +98,5 @@
       command: '/usr/local/rvm/bin/rvm alias create default 2.2.2'
 
     - name: Install bundler
-      shell: >
-        /usr/local/rvm/wrappers/ruby-2.2.2/gem list
-        | if ! grep "^bundler " ; then /usr/local/rvm/wrappers/ruby-2.2.2/gem install bundler ; fi
-      args:
-        creates: '/usr/local/rvm/wrappers/ruby-2.2.2/bundler'
-      register: bundler_install
+      command: /bin/bash -l -c 'gem install bundler --no-ri --no-rdoc'
+      sudo_user: 'root'
