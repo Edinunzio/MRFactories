@@ -56,8 +56,8 @@
     - name: Create mysql user
       mysql_user: name=sa password=dinz217 priv=*.*:ALL
 
-    #- name: Create mysql database
-      #mysql_db: name=MR
+    - name: Create mysql database
+      mysql_db: name=MR
 
     - name: Detect rvm binary
       stat: path='/usr/local/rvm/bin/rvm'
@@ -130,8 +130,10 @@
     - name: Precompile assets
       command: 'bundle exec rake assets:precompile chdir="../../vagrant/"'
 
-    - name: Create db
-      command: 'bundle exec rake db:create chdir="../../vagrant"'
+    - name: Install rails
+      command: 'gem install rails chdir="../../vagrant/"'
+      sudo_user: 'root'
 
     #- name: Migrate database
       #command: 'bundle exec rake db:migrate chdir="../../vagrant/"'
+      #sudo_user: 'root'
