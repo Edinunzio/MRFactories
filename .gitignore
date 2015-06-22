@@ -12,6 +12,8 @@
 !/log/.keep
 /tmp
 *.idea/
+*.vagrant/
+.DS_Store
 
 .DS_Store
 .vagrant

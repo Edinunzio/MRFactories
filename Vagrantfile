@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -33,6 +34,7 @@ def ansible_installed?
   end
 end
 
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
@@ -43,6 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network 'forwarded_port', :guest => 80, :host => 7000, :auto_correct => true
   config.vm.network 'forwarded_port', :guest => 443, :host => 8081, :auto_correct => true
   config.vm.provision :ansible do |ansible| ansible.playbook = "ansible/playbook.yml"
+
   end
 
   if ansible_installed?
