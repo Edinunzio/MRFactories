@@ -46,8 +46,49 @@
         - python-pip
         - python-dev
 
+    - name: Install required python module
+      pip: name=MySQL-python
 
+    - name: Enable and start mysql
+      service: name=mysql enabled=yes state=started
 
-    #- name: Install ruby #might want to use rvm instead
+    - name: Create mysql user
+      mysql_user: name=sa password=sasa priv=*.*:ALL
 
-      #apt: name=ruby-full state=present
+    - name: Create mysql database
+      mysql_db: name=MR
+
+    - name: Detect rvm binary
+      stat: path='/usr/local/rvm/bin/rvm'
+      register: rvm_binary
+
+    - name: Detect rvm installer
+      stat: path='/tmp/rvm-installer.sh'
+      register: rvm_installer
+
+    - name: Install rvm installer
+      get_url:
+        url: 'https://raw.githubusercontent.com/wayneeseguin/rvm/master/binscripts/rvm-installer'
+        dest: '/tmp/rvm-installer.sh'
+      #when: not rvm_installer.stat.exists
+
+    - name: Configure rvm installer
+      file:
+        path: '/tmp/rvm-installer.sh'
+        mode: 0755
+      #when: not rvm_installer.stat.exists
+
+    - name: Import GPG keys
+      command: 'gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3'
+      changed_when: False
+      sudo_user: 'root'
+
+    - name: Install rvm
+      command: >
+        /tmp/rvm-installer.sh stable
+        --path /usr/local/rvm --auto-dotfiles
+      #when: not rvm_binary.stat.exists
+      sudo_user: 'root'
+
+    - name: Select default ruby
+      command: '/usr/local/rvm/bin/rvm alias create default 2.2.2'
