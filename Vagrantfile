@@ -1,7 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-Vagrant.require_version '>= 1.5'
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
 
 def require_plugins(plugins = {})
   needs_restart = false
@@ -33,43 +35,22 @@ def ansible_installed?
 end
 
 
-Vagrant.configure('2') do |config|
-  config.vm.provider :virtualbox do |vb, override|
-    host = RbConfig::CONFIG["host_os"]
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # All Vagrant configuration is done here. The most common configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
 
-    if host =~ /darwin/ # OS X
-      # sysctl returns bytes, convert to MB
-      vb.memory = `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 3
-      vb.cpus = `sysctl -n hw.ncpu`.to_i
-    elsif host =~ /linux/ # Linux
-      # meminfo returns kilobytes, convert to MB
-      vb.memory = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 / 2
-      vb.cpus = `nproc`.to_i
-    end
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.box = "ubuntu/trusty64"
+  config.vm.network 'forwarded_port', :guest => 80, :host => 7000, :auto_correct => true
+  config.vm.network 'forwarded_port', :guest => 443, :host => 8081, :auto_correct => true
+  config.vm.provision :ansible do |ansible| ansible.playbook = "ansible/playbook.yml"
 
-    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
   end
-
-  config.vm.define 'MR_factories' do |machine|
-    machine.vm.hostname = 'localhost'
-    machine.vm.network 'forwarded_port', :guest => 443, :host => 8081, :auto_correct => true
-    machine.vm.network 'forwarded_port', :guest => 80, :host => 7000, :auto_correct => true
-
-    machine.vm.box = 'ubuntu/trusty64'
-
-    machine.vm.network 'private_network', ip: '192.168.20.50'
-    machine.vm.synced_folder '../../', '/app/'
-    machine.vm.synced_folder 'ansible', '/ansible'
-  end
-  config.vm.synced_folder '/MR_factories/', '/app/'
-
-
-  config.ssh.forward_agent = true
 
   if ansible_installed?
     config.vm.provision 'ansible' do |ansible|
-      ansible.playbook = 'ansible/site.yml'
+      ansible.playbook = 'ansible/playbook.yml'
       ansible.sudo = true
       ansible.groups = {
           'application' => %w(MR_factories),
@@ -85,4 +66,5 @@ Vagrant.configure('2') do |config|
       config.vm.provision 'shell', :path => script, :privileged => false, :args => ENV['ANSIBLE_ARGS']
     end
   end
+
 end

@@ -1,0 +1,139 @@
+---
+
+- hosts: all
+
+  sudo: true
+
+  tasks:
+
+    - name: Update apt cache
+      apt: update_cache=yes
+
+    - name: Install apt dependencies
+      apt: name={{ item }}
+      with_items:
+        - autoconf
+        - bison
+        - build-essential
+        - libssl-dev
+        - libyaml-dev
+        - libreadline6-dev
+        - zlib1g-dev
+        - libncurses5-dev
+        - nodejs
+        - python-pip
+        - python-dev
+        - htop
+        - git
+
+    - name: Install CURL
+
+      apt: name='{{ item }}'
+      with_items:
+        - curl
+        - libcurl3
+        - libcurl3-gnutls
+        - libcurl4-openssl-dev
+        - imagemagick
+        - qt5-default
+        - libqt5webkit5-dev
+
+    - name: Install mysql packages
+      apt: name='{{ item }}'
+      with_items:
+        - mysql-server
+        - libmysqlclient-dev
+        - python-pip
+        - python-dev
+
+    - name: Install required python module
+      pip: name=MySQL-python
+
+    - name: Enable and start mysql
+      service: name=mysql enabled=yes state=started
+
+
+    - name: Create mysql user
+      mysql_user: name=sa password=dinz217 priv=*.*:ALL
+
+    - name: Create mysql database
+      mysql_db: name=MR
+
+    - name: Detect rvm binary
+      stat: path='/usr/local/rvm/bin/rvm'
+      register: rvm_binary
+
+    - name: Detect rvm installer
+      stat: path='/tmp/rvm-installer.sh'
+      register: rvm_installer
+
+    - name: Install rvm installer
+      get_url:
+        url: 'https://raw.githubusercontent.com/wayneeseguin/rvm/master/binscripts/rvm-installer'
+        dest: '/tmp/rvm-installer.sh'
+      #when: not rvm_installer.stat.exists
+
+    - name: Configure rvm installer
+      file:
+        path: '/tmp/rvm-installer.sh'
+        mode: 0755
+      #when: not rvm_installer.stat.exists
+
+    - name: Import GPG keys
+      command: 'gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3'
+      changed_when: False
+      sudo_user: 'root'
+
+    - name: Install rvm
+      command: >
+        /tmp/rvm-installer.sh stable
+        --path /usr/local/rvm --auto-dotfiles
+      #when: not rvm_binary.stat.exists
+      sudo_user: 'root'
+
+    - name: Install rubies
+      command: '/usr/local/rvm/bin/rvm install 2.2.2 --auto-dotfiles'
+      sudo_user: 'root'
+
+    - name: Select default ruby
+      command: '/usr/local/rvm/bin/rvm alias create default 2.2.2'
+
+    - name: Install bundler
+      command: /bin/bash -l -c 'gem install bundler --no-ri --no-rdoc'
+      sudo_user: 'root'
+
+    - name: Symlink ruby related binaries on the system path
+      file:
+        state: 'link'
+        src: '/usr/local/rvm/wrappers/default/{{ item }}'
+        dest: '/usr/local/bin/{{ item }}'
+        owner: 'root'
+        group: 'root'
+      with_items:
+        - 'bundle'
+        - 'bundler'
+        - 'erb'
+        - 'executable-hooks-uninstaller'
+        - 'gem'
+        - 'irb'
+        - 'rake'
+        - 'rdoc'
+        - 'ri'
+        - 'ruby'
+        - 'testrb'
+
+    - name: Install bundle
+      command: 'bundle install --deployment --without="development test"'
+      args:
+        chdir: '../../vagrant/'
+
+    - name: Precompile assets
+      command: 'bundle exec rake assets:precompile chdir="../../vagrant/"'
+
+    - name: Install rails
+      command: 'gem install rails chdir="../../vagrant/"'
+      sudo_user: 'root'
+
+    #- name: Migrate database
+      #command: 'bundle exec rake db:migrate chdir="../../vagrant/"'
+      #sudo_user: 'root'
