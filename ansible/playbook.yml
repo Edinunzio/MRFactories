@@ -90,5 +90,9 @@
       #when: not rvm_binary.stat.exists
       sudo_user: 'root'
 
+    - name: Install rubies
+      command: '/usr/local/rvm/bin/rvm install 2.2.2 --auto-dotfiles'
+      sudo_user: 'root'
+
     - name: Select default ruby
       command: '/usr/local/rvm/bin/rvm alias create default 2.2.2'
