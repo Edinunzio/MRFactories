@@ -52,11 +52,12 @@
     - name: Enable and start mysql
       service: name=mysql enabled=yes state=started
 
-    - name: Create mysql user
-      mysql_user: name=sa password=sasa priv=*.*:ALL
 
-    - name: Create mysql database
-      mysql_db: name=MR
+    - name: Create mysql user
+      mysql_user: name=sa password=dinz217 priv=*.*:ALL
+
+    #- name: Create mysql database
+      #mysql_db: name=MR
 
     - name: Detect rvm binary
       stat: path='/usr/local/rvm/bin/rvm'
@@ -100,3 +101,37 @@
     - name: Install bundler
       command: /bin/bash -l -c 'gem install bundler --no-ri --no-rdoc'
       sudo_user: 'root'
+
+    - name: Symlink ruby related binaries on the system path
+      file:
+        state: 'link'
+        src: '/usr/local/rvm/wrappers/default/{{ item }}'
+        dest: '/usr/local/bin/{{ item }}'
+        owner: 'root'
+        group: 'root'
+      with_items:
+        - 'bundle'
+        - 'bundler'
+        - 'erb'
+        - 'executable-hooks-uninstaller'
+        - 'gem'
+        - 'irb'
+        - 'rake'
+        - 'rdoc'
+        - 'ri'
+        - 'ruby'
+        - 'testrb'
+
+    - name: Install bundle
+      command: 'bundle install --deployment --without="development test"'
+      args:
+        chdir: '../../vagrant/'
+
+    - name: Precompile assets
+      command: 'bundle exec rake assets:precompile chdir="../../vagrant/"'
+
+    - name: Create db
+      command: 'bundle exec rake db:create chdir="../../vagrant"'
+
+    #- name: Migrate database
+      #command: 'bundle exec rake db:migrate chdir="../../vagrant/"'
