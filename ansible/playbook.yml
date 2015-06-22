@@ -1,0 +1,19 @@
+---
+
+- hosts: all
+
+  sudo: true
+
+  tasks:
+
+    - name: install apache
+
+      apt: name=apache2 state=present
+
+    - name: install mysql
+
+      apt: name=mysql-server state=present
+
+    - name: install ruby
+
+      apt: name=ruby-2.2.2 state=present
