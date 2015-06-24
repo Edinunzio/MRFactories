@@ -11,5 +11,6 @@
       </p>
       <%= link_to 'Show', factory_path(factory) %>
       <%= link_to 'Edit', edit_factory_path(factory) %>
+      <%= link_to 'Delete', factory_path(factory), method: :delete, data: { confirm: 'Are you sure?' } %>
     </div>
 <% end %>

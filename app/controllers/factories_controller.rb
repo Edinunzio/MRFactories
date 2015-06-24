@@ -36,7 +36,10 @@ class FactoriesController < ApplicationController
   end
 
   def destroy
+    @factory = Factory.find(params[:id])
+    @factory.destroy
 
+    redirect_to factories_path
   end
 
   private
