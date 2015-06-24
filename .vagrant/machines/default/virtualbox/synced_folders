@@ -1,1 +1,1 @@
-{"virtualbox":{"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/liz/RubymineProjects/MR_factories","disabled":false}}}
+{"virtualbox":{"/MR_factories":{"create":true,"guestpath":"/MR_factories","hostpath":"/Users/liz/RubymineProjects/MR_factories","disabled":false},"/vagrant":{"guestpath":"/vagrant","hostpath":"/Users/liz/RubymineProjects/MR_factories","disabled":false}}}

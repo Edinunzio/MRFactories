@@ -122,18 +122,27 @@
         - 'ruby'
         - 'testrb'
 
-    - name: Install bundle
-      command: 'bundle install --deployment --without="development test"'
-      args:
-        chdir: '../../vagrant/'
+    #- name: Make dir
+      #command: 'mkdir app'
 
-    - name: Precompile assets
-      command: 'bundle exec rake assets:precompile chdir="../../vagrant/"'
+    - name: Install bundle
+      command: 'bundle install --deployment'
+      args:
+        chdir: '/MR_factories/'
+        #chdir: '../../vagrant/'
+
+    #- name: Precompile assets
+      #command: 'bundle exec rake assets:precompile chdir="/MR_factories/"'
+      #command: 'bundle exec rake assets:precompile chdir="../../vagrant/"'
 
     - name: Install rails
-      command: 'gem install rails chdir="../../vagrant/"'
+      #command: 'gem install rails --no-doc --no-ri chdir="../../vagrant/"'
+      command: 'gem install rails --no-doc --no-ri chdir="/MR_factories/"'
       sudo_user: 'root'
 
-    #- name: Migrate database
-      #command: 'bundle exec rake db:migrate chdir="../../vagrant/"'
-      #sudo_user: 'root'
+    - name: Migrate database
+      command: 'bundle exec rake db:migrate chdir="/MR_factories/"'
+      sudo_user: 'root'
+
+    #- name: run server
+      #command: 'rails server -b 0.0.0.0 -p7000 chdir="/MR_factories/"'

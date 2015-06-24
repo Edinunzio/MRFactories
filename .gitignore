@@ -14,8 +14,6 @@
 *.idea/
 *.vagrant/
 .DS_Store
-
-.DS_Store
 .vagrant
 public/assets
 vendor/bundle

@@ -11,19 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150621212639) do
+ActiveRecord::Schema.define(version: 20150622151013) do
 
   create_table "factories", force: :cascade do |t|
-    t.string   "name",       limit: 255
-    t.string   "email",      limit: 255
-    t.string   "address1",   limit: 255
-    t.string   "address2",   limit: 255
-    t.string   "city",       limit: 255
-    t.string   "state",      limit: 255
-    t.string   "zipcode",    limit: 255
-    t.string   "tags",       limit: 255
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.string "name",     limit: 255
+    t.string "email",    limit: 255
+    t.string "address1", limit: 255
+    t.string "address2", limit: 255
+    t.string "city",     limit: 255
+    t.string "state",    limit: 255
+    t.string "zipcode",  limit: 255
+    t.string "tags",     limit: 255
   end
 
 end
