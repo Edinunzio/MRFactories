@@ -140,9 +140,12 @@
       command: 'gem install rails --no-doc --no-ri chdir="/MR_factories/"'
       sudo_user: 'root'
 
-    - name: Migrate database
-      command: 'bundle exec rake db:migrate chdir="/MR_factories/"'
-      sudo_user: 'root'
+    #- name: Migrate database
+      #command: 'bundle exec rake db:migrate chdir="/MR_factories/"'
+      #sudo_user: 'root'
 
-    #- name: run server
-      #command: 'rails server -b 0.0.0.0 -p7000 chdir="/MR_factories/"'
+    - name: Generate seed data
+      command: 'bundle exec rake db:seed chdir="/MR_factories/"'
+
+    - name: run server
+      command: 'bundle exec rails server -b 0.0.0.0 -p7000 chdir="/MR_factories/"'
